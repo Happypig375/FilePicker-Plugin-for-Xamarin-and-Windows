@@ -95,6 +95,19 @@ namespace Plugin.FilePicker
             }
         }
 
+
+        /// <summary>
+        /// Lets the user create a file with the systems default file picker
+        /// For iOS iCloud drive needs to be configured
+        /// </summary>
+        /// <returns></returns>
+        public async Task<FileData> CreateFile()
+        {
+            var media = await TakeMediaAsync(null, true);
+
+            return media;
+        }
+
         /// <summary>
         /// Lets the user pick a file with the systems default file picker
         /// For iOS iCloud drive needs to be configured
@@ -102,12 +115,12 @@ namespace Plugin.FilePicker
         /// <returns></returns>
         public async Task<FileData> PickFile (string[] allowedTypes)
         {
-            var media = await TakeMediaAsync (allowedTypes);
+            var media = await TakeMediaAsync (allowedTypes, false);
 
             return media;
         }
 
-        private Task<FileData> TakeMediaAsync (string[] allowedTypes)
+        private Task<FileData> TakeMediaAsync (string[] allowedTypes, bool isCreate)
         {
             var id = GetRequestId();
 
@@ -126,7 +139,7 @@ namespace Plugin.FilePicker
             {
                 allowedUtis = allowedTypes;
             }
-
+            
             // NOTE: Importing makes a local copy of the document, while opening opens the document directly
             var documentPicker = new UIDocumentPickerViewController(allowedUtis, UIDocumentPickerMode.Import);
             //var documentPicker = new UIDocumentPickerViewController(allowedUtis, UIDocumentPickerMode.Open);
@@ -143,7 +156,7 @@ namespace Plugin.FilePicker
             Handler = (s, e) =>
             {
                 var tcs = Interlocked.Exchange(ref _completionSource, null);
-
+                
                 tcs?.SetResult(new FileData(e.FilePath, e.FileName, () =>
                 {
                     var url = new NSUrl(e.FilePath);

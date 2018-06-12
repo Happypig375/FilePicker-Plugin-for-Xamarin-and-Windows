@@ -22,9 +22,11 @@ namespace Plugin.FilePicker
 
             context = Application.Context;
 
+            bool isCreate = Intent.GetBooleanExtra("isCreate", false);
+
             string[] allowedTypes = Intent.GetStringArrayExtra("allowedTypes") ?? null;
 
-            var intent = new Intent (Intent.ActionGetContent);
+            var intent = new Intent (isCreate ? Intent.ActionCreateDocument : Intent.ActionGetContent);
 
             if (allowedTypes != null)
             {
@@ -54,7 +56,7 @@ namespace Plugin.FilePicker
 
             intent.AddCategory (Intent.CategoryOpenable);
             try {
-                StartActivityForResult (Intent.CreateChooser (intent, "Select file"), 0);
+                StartActivityForResult (Intent.CreateChooser (intent, isCreate ? "Create file" : "Select file"), 0);
             } catch (Exception exAct) {
                 System.Diagnostics.Debug.Write (exAct);
             }
